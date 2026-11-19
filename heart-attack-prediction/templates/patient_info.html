@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Patient Information{% endblock %}
+{% block heading %}Patient Information{% endblock %}
+
+{% macro field(f, values) %}
+  {% set v = values.get(f.name, '') %}
+  <div class="col-md-6 col-xl-4">
+    {% if f.kind == 'binary' %}
+      <fieldset class="field">
+        <legend class="form-label fw-semibold">{{ f.label }}
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip" data-bs-title="{{ f.help }}" tabindex="0"></i>
+        </legend>
+        <div class="btn-group w-100 yes-no" role="radiogroup" aria-label="{{ f.label }}">
+          <input type="radio" class="btn-check" name="{{ f.name }}" id="{{ f.name }}-yes" value="1" {% if v == '1' %}checked{% endif %} required>
+          <label class="btn btn-outline-accent" for="{{ f.name }}-yes">Yes</label>
+          <input type="radio" class="btn-check" name="{{ f.name }}" id="{{ f.name }}-no" value="0" {% if v == '0' %}checked{% endif %}>
+          <label class="btn btn-outline-accent" for="{{ f.name }}-no">No</label>
+        </div>
+        <div class="form-text">{{ f.help }}</div>
+      </fieldset>
+    {% elif f.kind == 'select' %}
+      <label for="{{ f.name }}" class="form-label fw-semibold">{{ f.label }}</label>
+      <select id="{{ f.name }}" name="{{ f.name }}" class="form-select" required>
+        <option value="" disabled {% if not v %}selected{% endif %}>Select…</option>
+        {% for o in f.options %}
+        <option value="{{ o }}" {% if v == o %}selected{% endif %}>{{ o }}</option>
+        {% endfor %}
+      </select>
+      <div class="form-text">{{ f.help }}</div>
+    {% else %}
+      <label for="{{ f.name }}" class="form-label fw-semibold">{{ f.label }}
+        {% if f.unit %}<span class="text-muted fw-normal">({{ f.unit }})</span>{% endif %}
+      </label>
+      <input type="number" id="{{ f.name }}" name="{{ f.name }}" class="form-control"
+             value="{{ v }}" min="{{ f.min }}" max="{{ f.max }}"
+             step="{{ '1' if f.kind == 'int' else 'any' }}" inputmode="decimal" required>
+      <div class="form-text">{{ f.help }} Accepted: {{ f.min }}–{{ f.max }}.</div>
+    {% endif %}
+    <div class="invalid-feedback">Please provide a valid {{ f.label|lower }}.</div>
+  </div>
+{% endmacro %}
+
+{% block content %}
+<div class="intro-bar mb-4">
+  <div>
+    <h2 class="h4 mb-1">Patient data entry</h2>
+    <p class="muted mb-0">All fields are required (24 patient items; Blood Pressure is entered as systolic and diastolic). Values are validated on the server before any prediction is made.</p>
+  </div>
+  <span class="badge-soft"><i class="bi bi-lock"></i> Stored only in this app's local database</span>
+</div>
+
+{% if errors %}
+<div class="alert alert-danger" role="alert">
+  <strong><i class="bi bi-exclamation-circle"></i> Please fix the following:</strong>
+  <ul class="mb-0 mt-2">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<nav class="section-jump mb-4" aria-label="Form sections">
+  {% for s in sections %}
+  <a href="#section-{{ s.key }}"><i class="bi {{ s.icon }}"></i> {{ s.title.split(' ')[0] }}</a>
+  {% endfor %}
+</nav>
+
+<form method="post" action="{{ url_for('predict') }}" class="needs-validation" novalidate id="patientForm">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  {% for s in sections %}
+  <section class="card-panel p-4 mb-4" id="section-{{ s.key }}" aria-labelledby="title-{{ s.key }}">
+    <div class="d-flex align-items-start gap-3 mb-3">
+      <span class="section-icon"><i class="bi {{ s.icon }}"></i></span>
+      <div>
+        <h3 class="section-title mb-0" id="title-{{ s.key }}">{{ s.title }}</h3>
+        <p class="muted small mb-0">{{ s.desc }}</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      {% for f in s.fields %}
+        {{ field(f, values) }}
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+
+  <div class="card-panel p-3 d-flex flex-wrap align-items-center justify-content-between gap-3 sticky-actions">
+    <p class="small muted mb-0"><i class="bi bi-info-circle"></i> Results are experimental and not a diagnosis.</p>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('patient_info') }}"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+      <button type="submit" class="btn btn-accent px-4" id="submitBtn"><i class="bi bi-cpu"></i> Run LSTM prediction</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

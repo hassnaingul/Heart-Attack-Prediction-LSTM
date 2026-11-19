@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Model Information{% endblock %}
+{% block heading %}Model Information{% endblock %}
+{% block content %}
+<section class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card-panel p-4 h-100">
+      <h2 class="h5 mb-3"><i class="bi bi-cpu"></i> Model card</h2>
+      <dl class="kv">
+        <dt>Model</dt><dd>{{ model.name }} (Long Short-Term Memory network)</dd>
+        <dt>Task</dt><dd>{{ model.type }}</dd>
+        <dt>Artifact</dt><dd class="font-mono">{{ model.file }}{% if model.file_size_kb %} · {{ model.file_size_kb }} KB{% endif %}</dd>
+        <dt>Input shape</dt><dd class="font-mono">{{ model.input_shape }} (samples, time steps, features)</dd>
+        <dt>Output shape</dt><dd class="font-mono">{{ model.output_shape }}</dd>
+        <dt>Output activation</dt><dd>{{ model.output_activation }} (score between 0 and 1)</dd>
+        <dt>Total parameters</dt><dd>{{ '{:,}'.format(model.total_params) }}</dd>
+        <dt>Decision threshold</dt><dd>{{ model.threshold }} (score above → class 1)</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-panel p-4 h-100">
+      <h2 class="h5 mb-3"><i class="bi bi-sliders2"></i> Preprocessing pipeline</h2>
+      <dl class="kv">
+        <dt>Saved pipeline</dt><dd class="font-mono">preprocessor.pkl (ColumnTransformer)</dd>
+        <dt>Form fields</dt><dd>{{ model.raw_features }} form fields → {{ model.model_features }} model features</dd>
+        <dt>Numeric (StandardScaler)</dt><dd>{{ model.numeric_features }} features</dd>
+        <dt>Categorical (OneHotEncoder)</dt><dd>{{ model.categorical_features }} features: {{ model.categorical_names|join(', ') }}</dd>
+        <dt>One-hot drop rule</dt><dd class="font-mono">{{ model.ohe_drop }}</dd>
+        <dt>Processed width</dt><dd>{{ model.processed_features }} values → reshaped to (1, 1, {{ model.processed_features }})</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="card-panel p-4 mb-4">
+  <h2 class="h5 mb-3"><i class="bi bi-diagram-3"></i> Layer architecture</h2>
+  <div class="table-responsive">
+    <table class="table align-middle app-table mb-0">
+      <thead><tr><th>#</th><th>Layer</th><th>Type</th><th>Output shape</th><th>Activation</th><th class="text-end">Parameters</th></tr></thead>
+      <tbody>
+        {% for l in model.layers %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td class="font-mono">{{ l.name }}</td>
+          <td>{{ l.type }}</td>
+          <td class="font-mono">{{ l.output_shape }}</td>
+          <td>{{ l.activation or '—' }}</td>
+          <td class="text-end">{{ '{:,}'.format(l.params) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="5">Total</th><th class="text-end">{{ '{:,}'.format(model.total_params) }}</th></tr></tfoot>
+    </table>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card-panel p-4 h-100">
+      <h2 class="h5 mb-3"><i class="bi bi-clipboard-data"></i> How to read the output</h2>
+      <ul class="check-list">
+        <li>The model returns one probability-like score between 0 and 1.</li>
+        <li>Scores above {{ model.threshold }} are classified as <strong>class 1 (elevated model-indicated risk)</strong>.</li>
+        <li>The score is a model output, <strong>not a clinically validated risk percentage</strong>.</li>
+        <li>It is not a diagnosis and must be interpreted by a qualified clinician.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-panel p-4 h-100">
+      <h2 class="h5 mb-3"><i class="bi bi-shield-exclamation"></i> Performance &amp; limitations</h2>
+      <p class="muted">No accuracy, AUC, or other evaluation metrics are displayed. None were supplied with the project artifacts, and figures are not invented here.</p>
+      <ul class="check-list">
+        <li>Unseen categorical values are rejected by the saved encoder; the form only offers trained categories.</li>
+        <li>Predictions depend entirely on the population the model was trained on.</li>
+        <li>Input plausibility limits in the form are guards, not training-data ranges.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block heading %}Home{% endblock %}
+{% block content %}
+<section class="hero card-panel mb-4">
+  <div class="hero-copy">
+    <span class="eyebrow"><i class="bi bi-stars"></i> Deep learning · Clinical data</span>
+    <h2 class="hero-title">Heart Attack Risk Prediction System</h2>
+    <p class="hero-sub">
+      A professional workspace for running patient records through a trained
+      <strong>{{ model_name }}</strong> deep learning classifier, reviewing the
+      output, and keeping an auditable history of every assessment.
+    </p>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-accent btn-lg" href="{{ url_for('patient_info') }}"><i class="bi bi-person-plus"></i> Start an assessment</a>
+      <a class="btn btn-outline-accent btn-lg" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2"></i> Open dashboard</a>
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="pulse-ring"><i class="bi bi-heart-pulse-fill"></i></div>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-4">
+    <div class="card-panel stat-card">
+      <div class="stat-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+      <div><p class="stat-label">Predictions performed</p><p class="stat-value">{{ stats.total }}</p></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="card-panel stat-card">
+      <div class="stat-icon tone-danger"><i class="bi bi-exclamation-triangle"></i></div>
+      <div><p class="stat-label">Elevated model-indicated</p><p class="stat-value">{{ stats.positive }}</p></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="card-panel stat-card">
+      <div class="stat-icon tone-success"><i class="bi bi-shield-check"></i></div>
+      <div><p class="stat-label">Not elevated by the model</p><p class="stat-value">{{ stats.negative }}</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="card-panel p-4 mb-4">
+  <h3 class="section-title">How the prediction works</h3>
+  <ol class="workflow">
+    <li><span>1</span>Enter the patient's 24 clinical, lifestyle and environmental values.</li>
+    <li><span>2</span>The server validates every field and builds a 25-feature record.</li>
+    <li><span>3</span>The saved <code>preprocessor.pkl</code> scales and encodes the features into 48 values.</li>
+    <li><span>4</span>Values are reshaped to the LSTM's <code>(1, 1, 48)</code> input.</li>
+    <li><span>5</span>The saved <code>lstm_model.keras</code> returns a probability between 0 and 1.</li>
+    <li><span>6</span>A score above 0.5 is classified as elevated model-indicated risk.</li>
+    <li><span>7</span>The result and a downloadable report are stored in your history.</li>
+  </ol>
+</section>
+
+<div class="alert alert-warning d-flex gap-3 align-items-start" role="note">
+  <i class="bi bi-exclamation-octagon fs-4"></i>
+  <div><strong>Research use only.</strong> Outputs are experimental AI predictions, not medical diagnoses. Always seek professional medical evaluation.</div>
+</div>
+{% endblock %}

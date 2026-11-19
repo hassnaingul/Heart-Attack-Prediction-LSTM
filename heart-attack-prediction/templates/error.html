@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }}{% endblock %}
+{% block heading %}Error {{ code }}{% endblock %}
+{% block content %}
+<section class="card-panel p-5 text-center">
+  <div class="empty-state">
+    <i class="bi bi-exclamation-circle"></i>
+    <h2 class="h4 mb-2">{{ code }} · {{ name }}</h2>
+    <p class="muted mb-4">{{ message }}</p>
+    <a class="btn btn-accent" href="{{ url_for('index') }}"><i class="bi bi-house"></i> Back to home</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}About Project{% endblock %}
+{% block heading %}About Project{% endblock %}
+{% block content %}
+<section class="card-panel p-4 p-lg-5 mb-4">
+  <span class="eyebrow"><i class="bi bi-info-circle"></i> Project overview</span>
+  <h2 class="h3 mt-2">Heart Attack Risk Prediction System</h2>
+  <p class="muted lead-sm">
+    A Flask web application that makes an existing LSTM deep learning classifier usable through a clean,
+    validated clinical-data form, with saved results, history, charts and downloadable reports.
+  </p>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card-panel p-4 h-100">
+      <h3 class="section-title"><i class="bi bi-bullseye"></i> Objectives</h3>
+      <ul class="check-list">
+        <li>Serve the trained model through a reliable web interface.</li>
+        <li>Preserve the original preprocessing, feature order and 0.5 threshold.</li>
+        <li>Validate every input before inference.</li>
+        <li>Keep an auditable, local history of predictions.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card-panel p-4 h-100">
+      <h3 class="section-title"><i class="bi bi-stack"></i> Technology stack</h3>
+      <div class="chip-row">
+        <span class="chip">Python</span><span class="chip">Flask</span><span class="chip">TensorFlow / Keras</span>
+        <span class="chip">scikit-learn</span><span class="chip">Pandas</span><span class="chip">NumPy</span>
+        <span class="chip">SQLite</span><span class="chip">Bootstrap 5</span><span class="chip">Chart.js</span>
+        <span class="chip">Gunicorn</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card-panel p-4 mb-4">
+  <h3 class="section-title"><i class="bi bi-shield-lock"></i> Responsible use &amp; privacy</h3>
+  <div class="row g-3">
+    <div class="col-md-4"><h4 class="h6">Research tool only</h4><p class="muted small mb-0">Outputs are experimental. They are not diagnoses, and this software is not a medical device.</p></div>
+    <div class="col-md-4"><h4 class="h6">Local data storage</h4><p class="muted small mb-0">Entries and predictions are saved in a local SQLite database. Hosted instances may use ephemeral storage, see the README.</p></div>
+    <div class="col-md-4"><h4 class="h6">No fabricated metrics</h4><p class="muted small mb-0">The app shows no accuracy figures because none were supplied with the model artifacts.</p></div>
+  </div>
+</section>
+
+<div class="alert alert-warning d-flex gap-3 align-items-start" role="note">
+  <i class="bi bi-exclamation-octagon fs-4"></i>
+  <div>{{ disclaimer }}</div>
+</div>
+{% endblock %}

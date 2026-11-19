@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Prediction Result #{{ record.id }}{% endblock %}
+{% block heading %}Prediction Result{% endblock %}
+{% block content %}
+{% set elevated = record.predicted_class == 1 %}
+{% set pct = (record.probability * 100) | round(1) %}
+
+<section class="result-hero card-panel p-4 p-lg-5 mb-4 {{ 'is-elevated' if elevated else 'is-clear' }}">
+  <div class="row g-4 align-items-center">
+    <div class="col-lg-5">
+      <span class="eyebrow"><i class="bi bi-cpu"></i> {{ record.model_name }} classification</span>
+      <h2 class="result-title mt-2">
+        {% if elevated %}<i class="bi bi-exclamation-triangle-fill"></i> Elevated model-indicated risk
+        {% else %}<i class="bi bi-shield-check"></i> No elevated model-indicated risk{% endif %}
+      </h2>
+      <p class="mb-0 muted">Predicted class <strong>{{ record.predicted_class }}</strong> · {{ record.created_at|datetime }}</p>
+    </div>
+    <div class="col-lg-7">
+      <div class="score-card">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+          <div>
+            <p class="stat-label mb-1">Model output probability</p>
+            <p class="score-value mb-0">{{ '%.4f'|format(record.probability) }}</p>
+          </div>
+          <p class="small muted mb-0">Experimental model score (0–1). <strong>Not a clinically validated risk percentage.</strong></p>
+        </div>
+        <div class="scale mt-5" role="img" aria-label="Probability {{ '%.3f'|format(record.probability) }} on a 0 to 1 scale, threshold {{ threshold }}">
+          <div class="scale-fill" style="width: {{ pct }}%"></div>
+          <div class="scale-threshold" style="left: {{ threshold * 100 }}%"><span>threshold {{ threshold }}</span></div>
+        </div>
+        <div class="scale-labels"><span>0.0</span><span>0.5</span><span>1.0</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="alert alert-warning d-flex gap-3 align-items-start mb-4" role="alert">
+  <i class="bi bi-exclamation-octagon fs-4"></i>
+  <div>
+    <strong>This is an experimental AI prediction, not a medical diagnosis.</strong>
+    {{ disclaimer }}
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+  <a class="btn btn-accent" href="{{ url_for('download_report', record_id=record.id) }}"><i class="bi bi-download"></i> Download report (.txt)</a>
+  <button class="btn btn-outline-accent" type="button" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('history') }}"><i class="bi bi-clock-history"></i> Back to history</a>
+</div>
+
+<section class="row g-3">
+  <div class="col-12">
+    <div class="card-panel p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h3 class="section-title mb-0">Patient information summary</h3>
+        <span class="small muted">Prediction #{{ record.id }} · {{ record.created_at|datetime }}</span>
+      </div>
+      <div class="row g-3">
+        {% for g in groups %}
+        <div class="col-md-6">
+          <div class="summary-group">
+            <h4><i class="bi {{ g.icon }}"></i> {{ g.title }}</h4>
+            <dl class="kv kv-compact">
+              {% for row in g.rows %}
+              <dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>
+              {% endfor %}
+            </dl>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

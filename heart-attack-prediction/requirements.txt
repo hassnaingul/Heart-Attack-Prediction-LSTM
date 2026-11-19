@@ -1,0 +1,17 @@
+# Heart Attack Risk Prediction System: pinned runtime dependencies.
+# Versions verified together against lstm_model.keras and preprocessor.pkl.
+
+# Web application
+Flask==3.1.3
+Werkzeug==3.1.9
+gunicorn==27.0.1
+
+# Data and model runtime
+numpy==2.5.3
+pandas==3.0.5
+# preprocessor.pkl was saved with scikit-learn 1.6.1; loading with another
+# version triggers InconsistentVersionWarning and may change results.
+scikit-learn==1.6.1
+# CPU build on Linux/macOS (Render); full package on Windows (no -cpu wheel there).
+tensorflow-cpu==2.21.0; sys_platform != "win32"
+tensorflow==2.21.0; sys_platform == "win32"

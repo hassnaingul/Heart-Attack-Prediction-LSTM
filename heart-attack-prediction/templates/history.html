@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Prediction History{% endblock %}
+{% block heading %}Prediction History{% endblock %}
+{% block content %}
+<div class="intro-bar mb-4">
+  <div>
+    <h2 class="h4 mb-1">All saved predictions</h2>
+    <p class="muted mb-0">Newest first. {{ records|length }} record{{ '' if records|length == 1 else 's' }} stored locally.</p>
+  </div>
+  <a class="btn btn-accent" href="{{ url_for('patient_info') }}"><i class="bi bi-plus-lg"></i> New assessment</a>
+</div>
+
+<div class="card-panel p-0 overflow-hidden">
+  {% if records %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 app-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Date &amp; time</th><th>Age</th><th>Sex</th><th>Blood pressure</th>
+          <th>Cholesterol</th><th>BMI</th><th>Score</th><th>Result</th><th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td class="font-mono">{{ r.id }}</td>
+          <td class="text-nowrap">{{ r.created_at|datetime }}</td>
+          <td>{{ r.inputs['Age'] }}</td>
+          <td>{{ r.inputs['Sex'] }}</td>
+          <td class="text-nowrap">{{ r.inputs['Systolic BP'] }}/{{ r.inputs['Diastolic BP'] }}</td>
+          <td>{{ '%g'|format(r.inputs['Cholesterol']) }}</td>
+          <td>{{ '%.1f'|format(r.inputs['BMI']) }}</td>
+          <td class="font-mono">{{ '%.3f'|format(r.probability) }}</td>
+          <td>{% if r.predicted_class == 1 %}<span class="pill pill-danger">Elevated</span>{% else %}<span class="pill pill-success">Not elevated</span>{% endif %}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-accent" href="{{ url_for('result', record_id=r.id) }}" aria-label="View prediction {{ r.id }}"><i class="bi bi-eye"></i></a>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('download_report', record_id=r.id) }}" aria-label="Download report {{ r.id }}"><i class="bi bi-download"></i></a>
+            <form method="post" action="{{ url_for('delete_record', record_id=r.id) }}" class="d-inline"
+                  data-confirm="Delete prediction #{{ r.id }}? This cannot be undone.">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete prediction {{ r.id }}"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state p-5"><i class="bi bi-inbox"></i>
+    <p class="mb-3">No predictions have been saved yet.</p>
+    <a class="btn btn-accent btn-sm" href="{{ url_for('patient_info') }}">Start an assessment</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

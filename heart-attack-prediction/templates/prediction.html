@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Heart Attack Prediction{% endblock %}
+{% block heading %}Heart Attack Prediction{% endblock %}
+{% block content %}
+<section class="row g-3 mb-4">
+  <div class="col-lg-7">
+    <div class="card-panel p-4 h-100">
+      <span class="eyebrow"><i class="bi bi-activity"></i> Prediction engine</span>
+      <h2 class="h4 mt-2">Run an LSTM risk classification</h2>
+      <p class="muted">
+        Complete the patient information form. The server applies the saved preprocessing pipeline and LSTM model,
+        then shows the probability score, the classification, and a downloadable report.
+      </p>
+      <a class="btn btn-accent" href="{{ url_for('patient_info') }}"><i class="bi bi-arrow-right-circle"></i> Go to Patient Information</a>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card-panel p-4 h-100">
+      <h3 class="section-title">Engine status</h3>
+      <div class="status-row">
+        <span class="status-dot {{ 'ok' if model_ready else 'bad' }}"></span>
+        <span>{{ 'Model and preprocessor loaded' if model_ready else 'Model not loaded' }}</span>
+      </div>
+      <dl class="kv mt-3">
+        <dt>Model file</dt><dd class="font-mono">{{ model.file }} ({{ model.file_size_kb }} KB)</dd>
+        <dt>Form fields</dt><dd>{{ model.raw_features }} (24 items, Blood Pressure = 2 fields)</dd>
+        <dt>Processed inputs</dt><dd>{{ model.processed_features }} values</dd>
+        <dt>Threshold</dt><dd>{{ threshold }}</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="card-panel p-4 mb-4">
+  <h3 class="section-title">Pipeline</h3>
+  <div class="pipeline">
+    <div class="step"><i class="bi bi-pencil-square"></i><strong>Input</strong><span>Form values</span></div>
+    <div class="step"><i class="bi bi-shield-check"></i><strong>Validate</strong><span>Ranges &amp; types</span></div>
+    <div class="step"><i class="bi bi-sliders2"></i><strong>Preprocess</strong><span>Scale &amp; encode → {{ model.processed_features }}</span></div>
+    <div class="step"><i class="bi bi-diagram-3"></i><strong>Reshape</strong><span>(1, 1, {{ model.processed_features }})</span></div>
+    <div class="step"><i class="bi bi-cpu"></i><strong>LSTM</strong><span>Sigmoid output</span></div>
+    <div class="step"><i class="bi bi-graph-up"></i><strong>Result</strong><span>Score &amp; class</span></div>
+  </div>
+</section>
+
+{% if latest %}
+<section class="card-panel p-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div>
+      <h3 class="section-title mb-1">Most recent prediction</h3>
+      <p class="muted small mb-0">{{ latest.created_at|datetime }}</p>
+    </div>
+    <a class="btn btn-outline-accent btn-sm" href="{{ url_for('result', record_id=latest.id) }}">View result <i class="bi bi-arrow-right"></i></a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

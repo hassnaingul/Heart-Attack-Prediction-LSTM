@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block content %}
+<section class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-panel stat-card">
+      <div class="stat-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+      <div><p class="stat-label">Total predictions</p><p class="stat-value">{{ stats.total }}</p></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-panel stat-card">
+      <div class="stat-icon"><i class="bi bi-cpu"></i></div>
+      <div><p class="stat-label">Model</p><p class="stat-value fs-4">{{ model.name }}</p></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-panel stat-card">
+      <div class="stat-icon"><i class="bi bi-diagram-3"></i></div>
+      <div><p class="stat-label">Model type</p><p class="stat-value fs-6 mb-0">Deep Learning Classification</p></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-panel stat-card">
+      <div class="stat-icon"><i class="bi bi-sliders"></i></div>
+      <div><p class="stat-label">Decision threshold</p><p class="stat-value">{{ threshold }}</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-lg-5">
+    <div class="card-panel p-4 h-100">
+      <h3 class="section-title">Risk distribution</h3>
+      <p class="muted small">Model classifications across all saved predictions.</p>
+      <div class="chart-box">
+        {% if stats.total %}
+        <canvas id="riskChart" role="img" aria-label="Doughnut chart of elevated versus not elevated classifications"></canvas>
+        {% else %}
+        <div class="empty-state small"><i class="bi bi-pie-chart"></i>No predictions yet</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card-panel p-4 h-100">
+      <h3 class="section-title">Model output distribution</h3>
+      <p class="muted small">How many predictions fell into each 0.1-wide band of the model's output score.</p>
+      <div class="chart-box">
+        {% if stats.total %}
+        <canvas id="probChart" role="img" aria-label="Bar chart of model output score distribution"></canvas>
+        {% else %}
+        <div class="empty-state small"><i class="bi bi-bar-chart"></i>Run a prediction to see the distribution</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-panel p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h3 class="section-title mb-0">Recent predictions</h3>
+        <a class="small" href="{{ url_for('history') }}">View all <i class="bi bi-arrow-right"></i></a>
+      </div>
+      {% if stats.recent %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 app-table">
+          <thead><tr><th>Date</th><th>Age / Sex</th><th>Score</th><th>Result</th></tr></thead>
+          <tbody>
+          {% for r in stats.recent %}
+            <tr>
+              <td class="text-nowrap"><a href="{{ url_for('result', record_id=r.id) }}">{{ r.created_at|datetime }}</a></td>
+              <td>{{ r.inputs['Age'] }} / {{ r.inputs['Sex'] }}</td>
+              <td class="font-mono">{{ '%.3f'|format(r.probability) }}</td>
+              <td>{% if r.predicted_class == 1 %}<span class="pill pill-danger">Elevated</span>{% else %}<span class="pill pill-success">Not elevated</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state"><i class="bi bi-inbox"></i><p class="mb-2">No predictions yet.</p>
+        <a class="btn btn-accent btn-sm" href="{{ url_for('patient_info') }}">Create the first assessment</a></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-panel p-4 mb-3">
+      <h3 class="section-title">Model information</h3>
+      <dl class="kv">
+        <dt>Name</dt><dd>{{ model.name }}</dd>
+        <dt>Type</dt><dd>{{ model.type }}</dd>
+        <dt>Input shape</dt><dd class="font-mono">{{ model.input_shape }}</dd>
+        <dt>Parameters</dt><dd>{{ '{:,}'.format(model.total_params) }}</dd>
+        <dt>Output</dt><dd>Probability (sigmoid)</dd>
+      </dl>
+      <a class="small" href="{{ url_for('model_info') }}">Full model details <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="card-panel p-4">
+      <h3 class="section-title">Quick access</h3>
+      <div class="d-grid gap-2">
+        <a class="btn btn-accent" href="{{ url_for('patient_info') }}"><i class="bi bi-person-lines-fill"></i> Patient Information</a>
+        <a class="btn btn-outline-accent" href="{{ url_for('predict') }}"><i class="bi bi-activity"></i> Heart Attack Prediction</a>
+        <a class="btn btn-outline-secondary" href="{{ url_for('history') }}"><i class="bi bi-clock-history"></i> Prediction History</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="application/json" id="chart-data">{{ chart_data|tojson }}</script>
+{% endblock %}
